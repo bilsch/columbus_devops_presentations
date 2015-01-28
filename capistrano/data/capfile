@@ -1,0 +1,70 @@
+role :web_server
+role :shell_server
+role :ubuntu_server
+role :redhat_server
+
+server "bilsch.dyndns.org", :web_server, :shell_server, :ubuntu_server
+server "gir.home.bilsch.org", :web_server, :redhat_server
+server 'udooq.home.bilsch.org', :ubuntu_server
+server 'pi.home.bilsch.org', :ubuntu_server
+server '192.168.55.4', :redhat_server
+
+namespace :basics do
+
+  desc "Runs date on all_hosts"
+  task :date, :pty => true, :roles => [ :redhat_server, :ubuntu_server] do
+    run "/bin/date"
+  end
+  
+  desc "Checks if httpd is installed - only applies to redhat servers"
+  task :httpd_installed, :roles => :redhat_server do
+    installed_pkgs = (capture "rpm -qa").split("\n")
+    puts "checking #{installed_pkgs.size} packages for httpd stuff"
+    if installed_pkgs.include?("httpd")
+      puts "Yup"
+    else
+      puts "Nope"
+    end
+  end
+end # basics
+
+namespace :admin do
+  namespace :influxdb do
+
+    desc "admin:influxdb:start"
+    task :start, :hosts => "192.168.55.4" do
+      sudo("/sbin/service influxdb start")
+    end
+
+    desc "admin:influxdb:stop"
+    task :stop, :hosts => "192.168.55.4" do
+      sudo("/sbin/service influxdb stop")
+    end
+
+  end # influxdb
+end # admin
+namespace :deploy do
+  namespace :influxdb do
+    desc "deploy:influxdb"
+    task :default, :hosts => "192.168.55.4" do
+      # list of all things
+      deploy.influxdb.install
+    end
+
+    task :install, :hosts => "192.168.55.4" do
+      sudo "yum -y install http://s3.amazonaws.com/influxdb/influxdb-latest-1.x86_64.rpm"
+    end
+
+    task :configure, :hosts => "192.168.55.4" do
+      # populate /etc/default/influxdb with some crud
+      upload("configs/influxdb/influxdb-defaults", "/tmp/influxdb-defaults")
+      sudo("mv /tmp/influxdb-defaults /etc/default/influxdb")
+
+      # populate /opt/influxdb/shared/config.toml with some crud
+      upload("configs/influxdb/config.toml", "/tmp/config.toml")
+      sudo("mv /tmp/config.toml /opt/influxdb/shared/config.toml")
+      sudo("chown influxdb:influxdb /opt/influxdb/shared/config.toml")
+    end
+
+  end # influxdb
+end # deploy
