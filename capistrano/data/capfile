@@ -1,3 +1,5 @@
+require 'erb'
+
 role :web_server
 role :shell_server
 role :ubuntu_server
@@ -8,6 +10,27 @@ server "gir.home.bilsch.org", :web_server, :redhat_server
 server 'udooq.home.bilsch.org', :ubuntu_server
 server 'pi.home.bilsch.org', :ubuntu_server
 server '192.168.55.4', :redhat_server
+
+@influxdb_host='127.0.0.1'
+@influxdb_port='8086'
+@influxdb_metrics_db_name='metrics'
+
+# Very simple routine to load a file and 'render' an erb template
+# Returns rendered text or writes to a file on disk somewhere
+def erb_render(infile,outfile=nil)
+  begin
+    content = ERB.new(File.open(infile).read)
+    out = outfile.nil? ? StringIO.new : File.new(outfile, "w")
+    out.write(content.result)
+    out.seek 0
+    return out
+  rescue => e
+    puts "Failed to render temlate: #{e.message}"
+    exit 1
+  ensure
+    out.close
+  end
+end # erb_render
 
 namespace :basics do
 
@@ -42,6 +65,20 @@ namespace :admin do
     end
 
   end # influxdb
+
+  namespace :grafana do
+
+    desc "admin:grafana:start"
+    task :start, :hosts => "192.168.55.4" do
+      sudo("/sbin/service influxdb start")
+    end
+
+    desc "admin:grafana:stop"
+    task :stop, :hosts => "192.168.55.4" do
+      sudo("/sbin/service influxdb stop")
+    end
+
+  end # influxdb
 end # admin
 namespace :deploy do
   namespace :influxdb do
@@ -67,4 +104,27 @@ namespace :deploy do
     end
 
   end # influxdb
+
+  namespace :grafana do
+    desc "deploy:grafana"
+    task :default, :hosts => "192.168.55.4" do
+      # list of all things
+      deploy.grafana.install
+    end
+
+    desc "deploy:grafana:install"
+    # Yes, this could be a lot easier but you get the idea ;)
+    task :install, :hosts => "192.168.55.4" do
+      sudo "yum -y install http://mirror.us.leaseweb.net/epel/6/i386/epel-release-6-8.noarch.rpm"
+      sudo "yum -y install nodejs"
+      run "curl -o /tmp/grafana-1.9.1.tar.gz http://grafanarel.s3.amazonaws.com/grafana-1.9.1.tar.gz"
+      run "tar xzf /tmp/grafana-1.9.1.tar.gz"
+    end
+
+    desc "deploy:grafana:config"
+    task :config, :hosts => "192.168.55.4" do
+      run "cp grafana-1.9.1/config.sample.js grafana-1.9.1/config.js"
+      upload erb_render("configs/grafana/config.js.erb"), "grafana-1.9.1/config.js"
+    end
+  end # grafana
 end # deploy
