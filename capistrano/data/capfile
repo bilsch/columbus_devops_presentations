@@ -68,12 +68,13 @@ namespace :admin do
 
     desc "admin:grafana:start"
     task :start, :hosts => "192.168.55.4" do
-      sudo("/sbin/service influxdb start")
+      run "cd grafana ; /home/vagrant/grafana/node_modules/.bin/grunt server &"
     end
 
     desc "admin:grafana:stop"
     task :stop, :hosts => "192.168.55.4" do
-      sudo("/sbin/service influxdb stop")
+      puts "Well, there is no stop right now because I did not create an init script!"
+      exit 1
     end
 
   end # influxdb
@@ -114,15 +115,14 @@ namespace :deploy do
     # Yes, this could be a lot easier but you get the idea ;)
     task :install, :hosts => "192.168.55.4" do
       sudo "yum -y install http://mirror.us.leaseweb.net/epel/6/i386/epel-release-6-8.noarch.rpm"
-      sudo "yum -y install nodejs"
-      run "curl -o /tmp/grafana-1.9.1.tar.gz http://grafanarel.s3.amazonaws.com/grafana-1.9.1.tar.gz"
-      run "tar xzf /tmp/grafana-1.9.1.tar.gz"
+      sudo "yum -y install nodejs npm git nodejs-grunt"
+      run "git clone https://github.com/grafana/grafana.git; cd grafana ; git checkout v1.9.1"
     end
 
     desc "deploy:grafana:config"
     task :config, :hosts => "192.168.55.4" do
-      run "cp grafana-1.9.1/config.sample.js grafana-1.9.1/config.js"
-      upload erb_render("configs/grafana/config.js.erb"), "grafana-1.9.1/config.js"
+      upload erb_render("configs/grafana/config.js.erb"), "grafana/config.js"
+      run "cd grafana ; npm install; /home/vagrant/grafana/node_modules/.bin/grunt"
     end
   end # grafana
 end # deploy
