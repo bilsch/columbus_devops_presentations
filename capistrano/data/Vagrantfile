@@ -9,7 +9,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.forward_agent = true
   config.vm.hostname = "flux"
   config.vm.network "private_network", ip: "192.168.55.4"
-  config.vm.network "forwarded_port", guest: 5601, host: 5601
+  config.vm.network "forwarded_port", guest: 5601, host: 5601 # grafana
+  config.vm.network "forwarded_port", guest: 8083, host: 8083 # influxdb
+  config.vm.network "forwarded_port", guest: 8086, host: 8086 # influxdb
+  config.vm.network "forwarded_port", guest: 8090, host: 8090 # influxdb
+  config.vm.network "forwarded_port", guest: 8099, host: 8099 # influxdb
   
   config.vm.provider "virtualbox" do |vb|
     vb.gui = false

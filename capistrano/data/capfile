@@ -14,6 +14,8 @@ server '192.168.55.4', :redhat_server
 @influxdb_host='127.0.0.1'
 @influxdb_port='8086'
 @influxdb_metrics_db_name='metrics'
+@influxdb_grafana_user='grafana'
+@influxdb_grafana_pass='grafana'
 
 # Very simple routine to load a file and 'render' an erb template
 # Returns rendered text or writes to a file on disk somewhere
@@ -121,8 +123,14 @@ namespace :deploy do
 
     desc "deploy:grafana:config"
     task :config, :hosts => "192.168.55.4" do
-      upload erb_render("configs/grafana/config.js.erb"), "grafana/config.js"
+      upload erb_render("configs/grafana/config.js.erb"), "grafana/src/config.js"
       run "cd grafana ; npm install; /home/vagrant/grafana/node_modules/.bin/grunt"
+
+      # Create grafana user for metrics
+      #   - note Escaping problem and I don't feel like fixing it
+      run("curl -X POST 'http://localhost:8086/db/site_dev/users?u=root&p=root' -d '{\"name\": \"grafana\", \"grafana\": \"grafana user\"}'")
+      run("curl -X POST 'http://localhost:8086/db?u=root&p=root' -d '{\"name\": \"grafana\"}'")
+      run("curl -X POST 'http://localhost:8086/db?u=root&p=root' -d '{\"name\": \"metrics\"}'")
     end
   end # grafana
 end # deploy

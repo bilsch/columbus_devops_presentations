@@ -21,14 +21,14 @@ define(['settings'], function(Settings) {
         influxdb: {
           type: 'influxdb',
           url: "http://<%= @influxdb_host %>:<%= @influxdb_port %>/db/<%= @influxdb_metrics_db_name %>",
-          username: 'admin',
-          password: 'admin',
+          username: '<%= @influxdb_grafana_user %>',
+          password: '<%= @influxdb_grafana_pass %>',
         },
         grafana: {
           type: 'influxdb',
-          url: "http://<%= @influxdb_host %>:<%= @influxdb_port %>/db/<%= @influxdb_metrics_db_name %>",
-          username: 'admin',
-          password: 'admin',
+          url: "http://<%= @influxdb_host %>:<%= @influxdb_port %>/db/grafana",
+          username: '<%= @influxdb_grafana_user %>',
+          password: '<%= @influxdb_grafana_pass %>',
           grafanaDB: true
         },
       },
