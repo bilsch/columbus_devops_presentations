@@ -20,13 +20,13 @@ define(['settings'], function(Settings) {
       datasources: {
         influxdb: {
           type: 'influxdb',
-          url: "http://<%= influxdb_host %>:<%= influxdb_port %>/db/<%= influxdb_metrics_db_name %>",
+          url: "http://<%= @influxdb_host %>:<%= @influxdb_port %>/db/<%= @influxdb_metrics_db_name %>",
           username: 'admin',
           password: 'admin',
         },
         grafana: {
           type: 'influxdb',
-          url: "http://<%= influxdb_host %>:<%= influxdb_port %>/db/<%= influxdb_metrics_db_name %>",
+          url: "http://<%= @influxdb_host %>:<%= @influxdb_port %>/db/<%= @influxdb_metrics_db_name %>",
           username: 'admin',
           password: 'admin',
           grafanaDB: true

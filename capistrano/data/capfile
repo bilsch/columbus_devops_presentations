@@ -19,16 +19,14 @@ server '192.168.55.4', :redhat_server
 # Returns rendered text or writes to a file on disk somewhere
 def erb_render(infile,outfile=nil)
   begin
-    content = ERB.new(File.open(infile).read)
+    content = ERB.new(File.read(infile)).result(binding)
     out = outfile.nil? ? StringIO.new : File.new(outfile, "w")
-    out.write(content.result)
+    out.write(content)
     out.seek 0
     return out
   rescue => e
     puts "Failed to render temlate: #{e.message}"
     exit 1
-  ensure
-    out.close
   end
 end # erb_render
 
