@@ -14,5 +14,5 @@ a tagged release post a pull request and I'll be happy to merge it!
 1. Install nodejs
   * I used pre-built one from http://nodejs.org/download/
 1. cd reveal.js && npm install && npm install -g grunt-cli
-1. mv cap_pres.html index.html
+1. mv cap_pres.html reveal.js/index.html
 1. grunt serve
