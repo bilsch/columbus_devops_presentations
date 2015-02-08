@@ -111,6 +111,7 @@ namespace :deploy do
     task :default, :hosts => "192.168.55.4" do
       # list of all things
       deploy.grafana.install
+      deploy.grafana.config
     end
 
     desc "deploy:grafana:install"
