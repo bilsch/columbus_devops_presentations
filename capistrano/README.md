@@ -1,10 +1,10 @@
 ## reveal.js
 
 I could not figure out how to add a dir from a remote tagged release
-of reveal.js. Contents of reveal.js-3.0.0 are from
-https://github.com/hakimel/reveal.js/tree/3.0.0 and are subject to
+of reveal.js. Contents of reveal.js are from
+https://github.com/hakimel/reveal.js ( master or 3.0.0 ) and are subject to
 their license
-  - https://github.com/hakimel/reveal.js/tree/3.0.0/LICENSE
+  - https://github.com/hakimel/reveal.js/LICENSE
 
 Incidentally if someone knows how to add a remote/submodule against
 a tagged release post a pull request and I'll be happy to merge it!
@@ -13,6 +13,7 @@ a tagged release post a pull request and I'll be happy to merge it!
 
 1. Install nodejs
   * I used pre-built one from http://nodejs.org/download/
+1. git clone https://github.com/hakimel/reveal.js
 1. cd reveal.js && npm install && npm install -g grunt-cli
 1. mv cap_pres.html reveal.js/index.html
-1. grunt serve
+1. cd reveal.js ; grunt serve
